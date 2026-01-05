@@ -1,0 +1,600 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Panel - User Management</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+            overflow: hidden;
+        }
+        
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+        
+        .header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+        }
+        
+        .header p {
+            opacity: 0.9;
+        }
+        
+        .controls {
+            padding: 20px 30px;
+            background: #f8f9fa;
+            border-bottom: 1px solid #dee2e6;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 15px;
+        }
+        
+        .search-box {
+            flex: 1;
+            min-width: 250px;
+        }
+        
+        .search-box input {
+            width: 100%;
+            padding: 10px 15px;
+            border: 2px solid #dee2e6;
+            border-radius: 6px;
+            font-size: 14px;
+        }
+        
+        .search-box input:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+        
+        button {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 600;
+            transition: all 0.3s;
+        }
+        
+        .btn-refresh {
+            background: #28a745;
+            color: white;
+        }
+        
+        .btn-refresh:hover {
+            background: #218838;
+        }
+        
+        .btn-block {
+            background: #dc3545;
+            color: white;
+            padding: 6px 12px;
+            font-size: 12px;
+        }
+        
+        .btn-block:hover {
+            background: #c82333;
+        }
+        
+        .btn-unblock {
+            background: #28a745;
+            color: white;
+            padding: 6px 12px;
+            font-size: 12px;
+        }
+        
+        .btn-unblock:hover {
+            background: #218838;
+        }
+        
+        .content {
+            padding: 30px;
+            overflow-x: auto;
+        }
+        
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+        
+        .stat-card {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 8px;
+            text-align: center;
+            border: 2px solid #dee2e6;
+        }
+        
+        .stat-card h3 {
+            color: #667eea;
+            font-size: 2em;
+            margin-bottom: 5px;
+        }
+        
+        .stat-card p {
+            color: #6c757d;
+            font-size: 14px;
+        }
+        
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            background: white;
+        }
+        
+        thead {
+            background: #667eea;
+            color: white;
+        }
+        
+        th {
+            padding: 15px;
+            text-align: left;
+            font-weight: 600;
+            font-size: 14px;
+        }
+        
+        td {
+            padding: 15px;
+            border-bottom: 1px solid #dee2e6;
+            font-size: 14px;
+        }
+        
+        tr:hover {
+            background: #f8f9fa;
+        }
+        
+        .badge {
+            display: inline-block;
+            padding: 4px 10px;
+            border-radius: 12px;
+            font-size: 12px;
+            font-weight: 600;
+        }
+        
+        .badge-blocked {
+            background: #dc3545;
+            color: white;
+        }
+        
+        .badge-active {
+            background: #28a745;
+            color: white;
+        }
+        
+        .user-info {
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .user-email {
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 4px;
+        }
+        
+        .user-name {
+            color: #6c757d;
+            font-size: 12px;
+        }
+        
+        .user-id {
+            color: #adb5bd;
+            font-size: 11px;
+            font-family: monospace;
+            margin-top: 4px;
+        }
+        
+        .stats-cell {
+            display: flex;
+            gap: 15px;
+            flex-wrap: wrap;
+        }
+        
+        .stat-item {
+            font-size: 12px;
+            color: #6c757d;
+        }
+        
+        .stat-item strong {
+            color: #333;
+        }
+        
+        .no-users {
+            text-align: center;
+            padding: 60px 20px;
+            color: #6c757d;
+        }
+        
+        .no-users h2 {
+            margin-bottom: 10px;
+            color: #333;
+        }
+        
+        .status-message {
+            padding: 15px;
+            margin: 20px 30px;
+            border-radius: 6px;
+            text-align: center;
+            font-weight: 600;
+            display: none;
+        }
+        
+        .status-success {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+        
+        .status-error {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🔐 Admin Panel</h1>
+            <p>User Account Management</p>
+        </div>
+        
+        <div id="statusMessage" class="status-message"></div>
+        
+        <div class="controls">
+            <div class="search-box">
+                <input type="text" id="searchInput" placeholder="Search by email or name..." onkeyup="filterUsers()">
+            </div>
+            <button class="btn-refresh" onclick="loadUsers()">🔄 Refresh</button>
+        </div>
+        
+        <div class="content">
+            <div class="stats" id="statsContainer"></div>
+            <div id="usersTableContainer"></div>
+        </div>
+    </div>
+
+    <script>
+        let allUsers = [];
+        let allUsersData = [];
+
+        // Load users and their data
+        function loadUsers() {
+            try {
+                // Get all users from localStorage
+                const usersData = localStorage.getItem('movieMate_users');
+                if (!usersData) {
+                    displayNoUsers();
+                    return;
+                }
+                
+                allUsers = JSON.parse(usersData);
+                
+                // Get statistics for each user
+                allUsersData = allUsers.map(user => {
+                    const stats = getUserStats(user.id);
+                    return {
+                        ...user,
+                        stats: stats
+                    };
+                });
+                
+                displayStats();
+                displayUsers(allUsersData);
+            } catch (error) {
+                console.error('Error loading users:', error);
+                showStatus('Error loading users: ' + error.message, 'error');
+            }
+        }
+
+        // Get user statistics from localStorage
+        function getUserStats(userId) {
+            const stats = {
+                watched: 0,
+                ratings: 0,
+                favorites: 0,
+                wantToWatch: 0,
+                onboardingComplete: false
+            };
+            
+            try {
+                // Watched movies
+                const watchedKey = `movieMate_watched_${userId}`;
+                const watchedData = localStorage.getItem(watchedKey);
+                if (watchedData) {
+                    const watched = JSON.parse(watchedData);
+                    stats.watched = Array.isArray(watched) ? watched.length : Object.keys(watched).length;
+                }
+                
+                // Ratings
+                const ratingsKey = `movieMate_ratings_${userId}`;
+                const ratingsData = localStorage.getItem(ratingsKey);
+                if (ratingsData) {
+                    const ratings = JSON.parse(ratingsData);
+                    stats.ratings = Object.keys(ratings).length;
+                }
+                
+                // Favorites
+                const favoritesKey = `movieMate_favorites_${userId}`;
+                const favoritesData = localStorage.getItem(favoritesKey);
+                if (favoritesData) {
+                    const favorites = JSON.parse(favoritesData);
+                    stats.favorites = Array.isArray(favorites) ? favorites.length : 0;
+                }
+                
+                // Want to watch
+                const wantToWatchKey = `movieMate_wantToWatch_${userId}`;
+                const wantToWatchData = localStorage.getItem(wantToWatchKey);
+                if (wantToWatchData) {
+                    const wantToWatch = JSON.parse(wantToWatchData);
+                    stats.wantToWatch = Array.isArray(wantToWatch) ? wantToWatch.length : Object.keys(wantToWatch).length;
+                }
+                
+                // Onboarding status
+                const onboardingKey = `movieMate_onboarding_complete_${userId}`;
+                stats.onboardingComplete = localStorage.getItem(onboardingKey) === 'true';
+            } catch (error) {
+                console.error('Error getting user stats:', error);
+            }
+            
+            return stats;
+        }
+
+        // Display statistics
+        function displayStats() {
+            const statsContainer = document.getElementById('statsContainer');
+            const totalUsers = allUsers.length;
+            const blockedUsers = allUsers.filter(u => u.blocked === true).length;
+            const activeUsers = totalUsers - blockedUsers;
+            
+            const totalWatched = allUsersData.reduce((sum, u) => sum + u.stats.watched, 0);
+            const totalRatings = allUsersData.reduce((sum, u) => sum + u.stats.ratings, 0);
+            
+            statsContainer.innerHTML = `
+                <div class="stat-card">
+                    <h3>${totalUsers}</h3>
+                    <p>Total Users</p>
+                </div>
+                <div class="stat-card">
+                    <h3>${activeUsers}</h3>
+                    <p>Active Users</p>
+                </div>
+                <div class="stat-card">
+                    <h3>${blockedUsers}</h3>
+                    <p>Blocked Users</p>
+                </div>
+                <div class="stat-card">
+                    <h3>${totalWatched}</h3>
+                    <p>Total Watched Movies</p>
+                </div>
+                <div class="stat-card">
+                    <h3>${totalRatings}</h3>
+                    <p>Total Ratings</p>
+                </div>
+            `;
+        }
+
+        // Display users table
+        function displayUsers(users) {
+            const container = document.getElementById('usersTableContainer');
+            
+            if (users.length === 0) {
+                displayNoUsers();
+                return;
+            }
+            
+            let html = `
+                <table>
+                    <thead>
+                        <tr>
+                            <th>User Info</th>
+                            <th>Account Created</th>
+                            <th>Status</th>
+                            <th>Statistics</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+            `;
+            
+            users.forEach(user => {
+                const createdDate = new Date(user.createdAt).toLocaleDateString();
+                const isBlocked = user.blocked === true;
+                const blockedDate = user.blockedAt ? new Date(user.blockedAt).toLocaleDateString() : '';
+                
+                html += `
+                    <tr>
+                        <td>
+                            <div class="user-info">
+                                <div class="user-email">${escapeHtml(user.email)}</div>
+                                <div class="user-name">${escapeHtml(user.name)}</div>
+                                <div class="user-id">${user.id}</div>
+                            </div>
+                        </td>
+                        <td>${createdDate}</td>
+                        <td>
+                            ${isBlocked 
+                                ? `<span class="badge badge-blocked">Blocked</span><br><small style="color: #6c757d; font-size: 11px;">Since: ${blockedDate}</small>`
+                                : `<span class="badge badge-active">Active</span>`
+                            }
+                        </td>
+                        <td>
+                            <div class="stats-cell">
+                                <div class="stat-item"><strong>Watched:</strong> ${user.stats.watched}</div>
+                                <div class="stat-item"><strong>Ratings:</strong> ${user.stats.ratings}</div>
+                                <div class="stat-item"><strong>Favorites:</strong> ${user.stats.favorites}</div>
+                                <div class="stat-item"><strong>Want to Watch:</strong> ${user.stats.wantToWatch}</div>
+                                <div class="stat-item"><strong>Onboarding:</strong> ${user.stats.onboardingComplete ? '✓' : '✗'}</div>
+                            </div>
+                        </td>
+                        <td>
+                            ${isBlocked 
+                                ? `<button class="btn-unblock" onclick="unblockUser('${user.id}')">Unblock</button>`
+                                : `<button class="btn-block" onclick="blockUser('${user.id}')">Block</button>`
+                            }
+                        </td>
+                    </tr>
+                `;
+            });
+            
+            html += `
+                    </tbody>
+                </table>
+            `;
+            
+            container.innerHTML = html;
+        }
+
+        // Display no users message
+        function displayNoUsers() {
+            const container = document.getElementById('usersTableContainer');
+            container.innerHTML = `
+                <div class="no-users">
+                    <h2>No Users Found</h2>
+                    <p>There are no registered users in the system.</p>
+                </div>
+            `;
+        }
+
+        // Block a user
+        function blockUser(userId) {
+            if (!confirm('Are you sure you want to block this user?')) {
+                return;
+            }
+            
+            try {
+                const users = JSON.parse(localStorage.getItem('movieMate_users') || '[]');
+                const userIndex = users.findIndex(u => u.id === userId);
+                
+                if (userIndex === -1) {
+                    showStatus('User not found', 'error');
+                    return;
+                }
+                
+                users[userIndex].blocked = true;
+                users[userIndex].blockedAt = new Date().toISOString();
+                
+                // If blocked user is currently logged in, log them out
+                const currentUserData = localStorage.getItem('movieMate_currentUser');
+                if (currentUserData) {
+                    const currentUser = JSON.parse(currentUserData);
+                    if (currentUser.id === userId) {
+                        localStorage.removeItem('movieMate_currentUser');
+                    }
+                }
+                
+                localStorage.setItem('movieMate_users', JSON.stringify(users));
+                showStatus('User blocked successfully', 'success');
+                loadUsers();
+            } catch (error) {
+                console.error('Error blocking user:', error);
+                showStatus('Error blocking user: ' + error.message, 'error');
+            }
+        }
+
+        // Unblock a user
+        function unblockUser(userId) {
+            if (!confirm('Are you sure you want to unblock this user?')) {
+                return;
+            }
+            
+            try {
+                const users = JSON.parse(localStorage.getItem('movieMate_users') || '[]');
+                const userIndex = users.findIndex(u => u.id === userId);
+                
+                if (userIndex === -1) {
+                    showStatus('User not found', 'error');
+                    return;
+                }
+                
+                users[userIndex].blocked = false;
+                users[userIndex].blockedAt = null;
+                
+                localStorage.setItem('movieMate_users', JSON.stringify(users));
+                showStatus('User unblocked successfully', 'success');
+                loadUsers();
+            } catch (error) {
+                console.error('Error unblocking user:', error);
+                showStatus('Error unblocking user: ' + error.message, 'error');
+            }
+        }
+
+        // Filter users
+        function filterUsers() {
+            const searchTerm = document.getElementById('searchInput').value.toLowerCase();
+            
+            if (!searchTerm) {
+                displayUsers(allUsersData);
+                return;
+            }
+            
+            const filtered = allUsersData.filter(user => 
+                user.email.toLowerCase().includes(searchTerm) ||
+                user.name.toLowerCase().includes(searchTerm) ||
+                user.id.toLowerCase().includes(searchTerm)
+            );
+            
+            displayUsers(filtered);
+        }
+
+        // Show status message
+        function showStatus(message, type) {
+            const statusDiv = document.getElementById('statusMessage');
+            statusDiv.textContent = message;
+            statusDiv.className = `status-message status-${type}`;
+            statusDiv.style.display = 'block';
+            
+            setTimeout(() => {
+                statusDiv.style.display = 'none';
+            }, 3000);
+        }
+
+        // Escape HTML to prevent XSS
+        function escapeHtml(text) {
+            const map = {
+                '&': '&amp;',
+                '<': '&lt;',
+                '>': '&gt;',
+                '"': '&quot;',
+                "'": '&#039;'
+            };
+            return text.replace(/[&<>"']/g, m => map[m]);
+        }
+
+        // Load users on page load
+        window.onload = function() {
+            loadUsers();
+        };
+    </script>
+</body>
+</html>
+
